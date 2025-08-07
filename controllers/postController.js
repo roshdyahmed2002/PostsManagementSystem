@@ -10,10 +10,10 @@ const getPosts = async (req,res,next)=>{
         const postsdb = await Post.findAll()
         console.log("here",postsdb)
         if(isNaN(limit) || limit<=0){
-            res.status(200).json(postsdb)
+            return res.status(200).json(postsdb)
         }
         else{
-            res.status(200).json(postsdb.slice(0,limit))
+            return res.status(200).json(postsdb.slice(0,limit))
         }
     }
     catch(err){
@@ -21,7 +21,7 @@ const getPosts = async (req,res,next)=>{
         //console.log(err)
         const error = new Error(err.sqlMessage)
         error.status=500
-        next(error)
+        return next(error)
     }
 }
 
@@ -32,13 +32,13 @@ const getPost = async (req,res,next)=>{
     const postDb = await Post.findByPk(id)
     if(postDb){
         const postDbJson = postDb.toJSON();
-        res.status(200).json(postDbJson)
+        return res.status(200).json(postDbJson)
     }
     else{
         const err = new Error(`Post with id: ${id} Not Found`)
         err.status=404
-        next(err)
-        //res.status(404).json(`Post with id: ${id} Not Found`)
+        return next(err)
+        //return res.status(404).json(`Post with id: ${id} Not Found`)
     }
 }
 
@@ -61,13 +61,13 @@ const createPost = async (req,res,next)=>{
             message:"Post created",
             posts: postsDb
         }
-        res.status(201).json(resp)
+        return res.status(201).json(resp)
     }
     else{
         const err = new Error(`Please enter the post details`)
         err.status=400
-        next(err)
-       // res.status(400).json("Please enter the post details")
+        return next(err)
+       // return res.status(400).json("Please enter the post details")
     }
 }
 
@@ -89,22 +89,22 @@ const updatePost = async (req,res,next)=>{
                     message : "post updated successfully",
                     posts : postsDb
                 }
-                res.status(200).json(resp)
+                return res.status(200).json(resp)
         }
         else{
             console.log("here")
             const err = new Error(`post with id: ${id} is not found`)
             err.status=404
             console.log("here")
-            next(err)
-            //res.status(404).json(`post with id: ${id} is not found`)
+            return next(err)
+            //return res.status(404).json(`post with id: ${id} is not found`)
         }
     }
     else{
         const err = new Error(`Please enter the updated post details`)
         err.status=400
-        next(err)
-        //res.status(400).json(`Please enter the updated post details`)
+        return next(err)
+        //return res.status(400).json(`Please enter the updated post details`)
     }
 }
 
@@ -124,13 +124,13 @@ const deletePost = async (req,res,next)=>{
             message : "post deleted successfully",
             posts: postsDb
         }
-        res.status(200).json(resp)
+        return res.status(200).json(resp)
     }
     else{
         const err = new Error(`post with id: ${id} is not found`)
         err.status=404
-        next(err)
-        //res.status(404).json(`post with id: ${id} is not found`)
+        return next(err)
+        //return res.status(404).json(`post with id: ${id} is not found`)
     }
 }
 
@@ -154,18 +154,18 @@ const addReactionToPost = async (req,res,next)=>{
         console.log("postReaction ",postReaction)
         if(post && reaction){
             await post.addReaction(reaction, {through: {quantity: ++quantity}})
-            res.status(200).json(await PostReaction.findAll())
+            return res.status(200).json(await PostReaction.findAll())
         }
         else{
             const err = new Error(`post with id: ${postId} or reaction with id: ${reactionId} is not found`)
             err.status=404
-            next(err)
+            return next(err)
         }
 
     }
     catch(err){
         console.error("ERROR HNA ", err)
-        res.status(500).json("Internal Server Error")
+        return res.status(500).json("Internal Server Error")
     }
 }
 
@@ -187,24 +187,24 @@ const removeReactionFromPost = async (req,res,next)=>{
                 console.log("update ",updatedNumRows)
                 const  x = await post.getReactions();
                 console.log("x: ",x[0].dataValues.postreactions)
-                res.status(200).json(await post.getReactions())
+                return res.status(200).json(await post.getReactions())
             }
             else{
                 const removedNum = await post.removeReaction(reaction)
                 console.log("remove ",removedNum)
-                res.status(200).json(await post.getReactions())
+                return res.status(200).json(await post.getReactions())
             }
         }
         else{
             const err = new Error(`No relationship existing between this post and reaction`)
             err.status=404
-            next(err)
+            return next(err)
         }
     }
     else{
         const err = new Error(`Either post id: ${postId} or reaction id: ${reactionId} are not found`)
         err.status=404
-        next(err)
+        return next(err)
     }
 }
 module.exports = {getPosts,getPost,createPost,updatePost,deletePost,addReactionToPost, removeReactionFromPost}

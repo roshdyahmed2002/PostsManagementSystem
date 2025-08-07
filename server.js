@@ -8,7 +8,9 @@ const sequelize = require("./utils/database")
 const Post = require("./models/Post")
 const Reaction = require("./models/Reaction")
 const PostReaction = require("./models/PostReaction")
+const User = require("./models/User")
 const reactionsRoutes = require("./routes/reactionsRoutes")
+const usersRoutes = require("./routes/usersRoutes")
 
 const port = process.env.PORT || 8080
 app.use(express.json())
@@ -21,6 +23,7 @@ app.get("/",(req,res)=>{
 
 app.use("/api/posts",postsRoutes)
 app.use("/api/reactions",reactionsRoutes)
+app.use("/api/users", usersRoutes)
 
 app.use(pageNotFoundHandler)
 
@@ -29,8 +32,11 @@ app.use(errorHandler)
 Post.belongsToMany(Reaction, {through : PostReaction})
 Reaction.belongsToMany(Post,{through:PostReaction})
 
+User.hasMany(Post)
+Post.belongsTo(User)
 
-sequelize.sync()
+
+sequelize.sync(/* {force : true }*/)
 .then(() => console.log("Database synced ✅"))
 //.then(result=>console.log(result))
 .catch(err=>console.log(err))
